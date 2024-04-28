@@ -1,0 +1,58 @@
+# Compiled class file
+*.class
+
+# Log file
+*.log
+
+# BlueJ files
+*.ctxt
+
+# Mobile Tools for Java (J2ME)
+.mtj.tmp/
+
+# Package Files #
+*.jar
+*.war
+*.nar
+*.ear
+*.zip
+*.tar.gz
+*.rar
+
+# virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
+hs_err_pid*
+
+# Gradle files
+.gradle/
+build/
+
+# Ignore Gradle GUI config
+gradle-app.setting
+
+# Avoid ignoring Gradle wrapper jar file (.jar files are usually ignored)
+!gradle-wrapper.jar
+
+# Cache of project
+.cache/
+
+# Kotlin
+*.kotlin_module
+
+# Ignore Gradle project-specific config directory
+.gradle/
+
+# Ignore Gradle build output directory
+build/
+
+# IntelliJ IDEA
+.idea/
+*.iws
+*.iml
+*.ipr
+
+# The .vscode folder contains launch configuration and tasks you configure in
+# Visual Studio Code which you typically do not want to share with others.
+.vscode/
+
+# Mac
+.DS_Store

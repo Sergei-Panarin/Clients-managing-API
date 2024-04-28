@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  db:
+    image: postgres:15.3-alpine
+    environment:
+      POSTGRES_DB: clientdb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - 5432:5432
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - db
+    ports:
+      - 8080:8080
+    environment:
+      POSTGRES_HOST: db
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: clientdb
+      POSTGRES_SCHEMA: public
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
