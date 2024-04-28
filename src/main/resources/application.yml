@@ -16,3 +16,5 @@ logging:
   level:
     root: INFO
     com.example.demo: DEBUG
+genderize:
+  api-url: https://api.genderize.io
