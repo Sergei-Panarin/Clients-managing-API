@@ -1,7 +1,11 @@
 package com.example.demo.service
 
+import com.example.demo.exception.ServiceError
+import com.example.demo.exception.ServiceException
 import com.example.demo.model.Client
 import com.example.demo.repository.ClientRepository
+import com.example.demo.specification.ClientSpecification
+import com.example.demo.specification.ClientSpecificationAdvanced
 import org.slf4j.LoggerFactory
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.PageRequest
@@ -22,7 +26,7 @@ class ClientServiceImpl(private val repository: ClientRepository,
             client.gender = genderizeResponse.gender
             return repository.save(client)
         } else {
-            throw Exception("Gender not detected")
+            throw ServiceException(ServiceError.INTERNAL_SERVER_ERROR, "Gender not detected")
         }
     }
 
@@ -35,7 +39,9 @@ class ClientServiceImpl(private val repository: ClientRepository,
     @Transactional(readOnly = true)
     override fun getClient(id: Long): Client {
         log.info("Getting client in ClientServiceImpl with id: $id")
-        return repository.findById(id).orElse(null)
+        return repository.findById(id).orElseThrow {
+            ServiceException(ServiceError.NOT_FOUND, "Client with id $id not found")
+        }
     }
 
     @Transactional
@@ -55,5 +61,19 @@ class ClientServiceImpl(private val repository: ClientRepository,
         existingClient.gender = client.gender
         log.info("Updating client in ClientServiceImpl with id: $id")
         return repository.save(existingClient)
+    }
+
+    @Transactional(readOnly = true)
+    override fun searchClientsByMap(searchMap: Map<String, String>, page: Int, size: Int): Page<Client> {
+        val specification = ClientSpecification(searchMap)
+        log.info("Searching clients in ClientServiceImpl with searchMap: $searchMap")
+        return repository.findAll(specification, PageRequest.of(page, size))
+    }
+
+    @Transactional(readOnly = true)
+    override fun searchClientsByString(search: String, page: Int, size: Int): Page<Client> {
+        val specification = ClientSpecificationAdvanced(search)
+        log.info("Searching clients in ClientServiceImpl with search string: $search")
+        return repository.findAll(specification, PageRequest.of(page, size))
     }
 }

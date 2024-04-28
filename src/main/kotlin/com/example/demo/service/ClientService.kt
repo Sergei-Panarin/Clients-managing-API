@@ -9,4 +9,6 @@ interface ClientService {
     fun getClient(id: Long): Client
     fun deleteClient(id: Long)
     fun updateClient(id: Long, client: Client): Client
+    fun searchClientsByMap(searchMap: Map<String, String>, page: Int, size: Int): Page<Client>
+    fun searchClientsByString(search: String, page: Int, size: Int): Page<Client>
 }

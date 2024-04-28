@@ -20,7 +20,7 @@ class GenderizeService {
     fun getGender(firstName: String): GenderizeResponse? {
 
         val request = Request.Builder()
-            .url("https://api.genderize.io/?name=$firstName")
+            .url("https://api.genderize.io/?name=$firstName") //TODO*****************************************************
             .build()
         log.info("Sending request to Genderize API for name $firstName")
 
