@@ -1,7 +1,7 @@
 package com.example.demo.client
 
 import com.example.demo.config.FeignConfig
-import com.example.demo.model.GenderizeResponse
+import com.example.demo.dto.GenderizeResponse
 import org.springframework.cloud.openfeign.FeignClient
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RequestParam

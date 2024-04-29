@@ -1,7 +1,7 @@
 package com.example.demo.service
 
 import com.example.demo.client.GenderizeClient
-import com.example.demo.model.GenderizeResponse
+import com.example.demo.dto.GenderizeResponse
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 

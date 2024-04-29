@@ -11,11 +11,8 @@ import org.springframework.web.bind.annotation.*
 @RequestMapping("/clients")
 class ClientController(private val clientService: ClientService, private val clientMapper: ClientMapper) : ClientControllerApi {
 
-    //private val log = LoggerFactory.getLogger(ClientController::class.java)
-
     @PostMapping("")
     override fun addClient(@RequestBody clientDto: ClientDto): ClientDto {
-        //log.info("Adding client in ClientController: $clientDto")
         val client = clientMapper.toEntity(clientDto)
         return clientMapper.toDto(clientService.addClient(client))
     }
