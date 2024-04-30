@@ -47,12 +47,16 @@ class ClientServiceImpl(private val repository: ClientRepository,
     @Transactional
     override fun deleteClient(id: Long) {
         log.info("Deleting client in ClientServiceImpl with id: $id")
+        if (!repository.existsById(id)) {
+            throw ServiceException(ServiceError.NOT_FOUND, "Client with id $id not found")
+        }
         repository.deleteById(id)
     }
 
     @Transactional
     override fun updateClient(id: Long, client: Client): Client {
-        val existingClient = repository.findById(id).orElseThrow { Exception("Client not found") }
+        val existingClient = repository.findById(id).orElseThrow {
+            ServiceException(ServiceError.NOT_FOUND, "Client with id $id not found") }
         existingClient.firstName = client.firstName
         existingClient.lastName = client.lastName
         existingClient.email = client.email

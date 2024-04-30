@@ -3,6 +3,7 @@ package com.example.demo.exception
 import org.slf4j.LoggerFactory
 import org.springframework.beans.TypeMismatchException
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.security.access.AccessDeniedException
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
@@ -46,6 +47,20 @@ class ExceptionControllerHandler {
     fun handleDataIntegrityViolationException(ex: DataIntegrityViolationException, request: WebRequest): ResponseEntity<ErrorResponse> {
         log.error("DataIntegrityViolationException occurred: ", ex)
         val error = ServiceError.BAD_REQUEST
+        val errorResponse = ErrorResponse(
+            timestamp = ZonedDateTime.now(),
+            code = error.status.value(),
+            status = error.status.name,
+            error = ex.javaClass.simpleName,
+            message = ex.message ?: error.message
+        )
+        return ResponseEntity(errorResponse, error.status)
+    }
+
+    @ExceptionHandler(AccessDeniedException::class)
+    fun handleAccessDeniedException(ex: AccessDeniedException, request: WebRequest): ResponseEntity<ErrorResponse> {
+        log.error("AccessDeniedException occurred: ", ex)
+        val error = ServiceError.FORBIDDEN
         val errorResponse = ErrorResponse(
             timestamp = ZonedDateTime.now(),
             code = error.status.value(),

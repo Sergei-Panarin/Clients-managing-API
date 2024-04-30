@@ -26,6 +26,11 @@ interface ClientControllerApi {
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
     @ApiResponse(
+        responseCode = "403",
+        description = "Forbidden",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+    )
+    @ApiResponse(
         responseCode = "500",
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -85,6 +90,11 @@ interface ClientControllerApi {
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
     @ApiResponse(
+        responseCode = "403",
+        description = "Forbidden",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+    )
+    @ApiResponse(
         responseCode = "404",
         description = "Client not found",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
@@ -108,9 +118,14 @@ interface ClientControllerApi {
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
     @ApiResponse(
+        responseCode = "403",
+        description = "Forbidden",
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))]
+    )
+    @ApiResponse(
         responseCode = "404",
         description = "Client not found",
-        content = [Content()]
+        content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
     @ApiResponse(
         responseCode = "500",
