@@ -154,6 +154,25 @@ class ClientControllerTest {
     }
 
     @Test
+    @WithMockUser(username = "test", roles = ["ADMIN"])
+    fun `add client with ROLE_ADMIN should throw exception when gender service response is delayed`() {
+        val clientDto = getClientDto()
+        val clientJson = objectMapper.writeValueAsString(clientDto)
+
+        WireMock.stubFor(WireMock.get(WireMock.urlMatching("/\\?name=.*"))
+            .willReturn(aResponse()
+                .withFixedDelay(4000)
+                .withHeader("Content-Type", "application/json")
+                .withBody(wireMockResponse)))
+
+        val result = mockMvc.perform(post("/clients")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(clientJson))
+
+        result.andExpect(status().isInternalServerError)
+    }
+
+    @Test
     @WithMockUser(username = "test", roles = ["USER"])
     fun `get client should return client with given id`() {
         val clientDto = getClientDto()
