@@ -7,6 +7,8 @@ import com.example.demo.getListOfClients
 import com.example.demo.getValidGenderizeResponse
 import com.example.demo.model.Client
 import com.example.demo.repository.ClientRepository
+import com.example.demo.service.impl.ClientServiceImpl
+import com.example.demo.service.impl.GenderizeServiceImpl
 import org.junit.jupiter.api.Assertions.assertEquals
 import org.junit.jupiter.api.Assertions.assertThrows
 import org.junit.jupiter.api.Test
@@ -29,7 +31,7 @@ class ClientServiceImplTest {
     @Mock
     private lateinit var clientRepository: ClientRepository
     @Mock
-    private lateinit var genderizeService: GenderizeService
+    private lateinit var genderizeService: GenderizeServiceImpl
     @InjectMocks
     private lateinit var clientService: ClientServiceImpl
 
@@ -89,6 +91,8 @@ class ClientServiceImplTest {
     @Test
     fun `updateClient should update existing client and return it`() {
         val client = getClient()
+        val genderizeResponse = getValidGenderizeResponse()
+        `when`(genderizeService.getGender(client.firstName)).thenReturn(genderizeResponse)
         `when`(clientRepository.findById(client.id!!)).thenReturn(Optional.of(client))
         `when`(clientRepository.save(any())).thenReturn(client)
 

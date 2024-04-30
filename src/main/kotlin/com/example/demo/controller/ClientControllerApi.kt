@@ -9,7 +9,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.util.MultiValueMap
-import org.springframework.web.bind.annotation.*
+import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 
 @Tag(name = "Client Controller")
 interface ClientControllerApi {
@@ -35,7 +36,7 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun addClient(@RequestBody clientDto: ClientDto): ClientDto
+    fun addClient(clientDto: ClientDto): ClientDto
 
     @Operation(summary = "Get all clients")
     @ApiResponse(
@@ -53,8 +54,7 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun getClients(@RequestParam(defaultValue = "0") page: Int,
-                   @RequestParam(defaultValue = "10") size: Int): Page<ClientDto>
+    fun getClients(page: Int, size: Int): Page<ClientDto>
 
     @Operation(summary = "Get a client by id")
     @ApiResponse(
@@ -77,7 +77,7 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun getClient(@PathVariable id: Long): ClientDto
+    fun getClient(id: Long): ClientDto
 
     @Operation(summary = "Delete a client by id")
     @ApiResponse(
@@ -104,7 +104,7 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun deleteClient(@PathVariable id: Long)
+    fun deleteClient(id: Long)
 
     @Operation(summary = "Update a client by id")
     @ApiResponse(
@@ -132,7 +132,7 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun updateClient(@PathVariable id: Long, @RequestBody clientDto: ClientDto): ClientDto
+    fun updateClient(id: Long, clientDto: ClientDto): ClientDto
 
     @Operation(summary = "Search clients by map")
     @ApiResponse(
@@ -170,7 +170,7 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun searchClientsByString(@RequestParam search: String,
-                              @RequestParam(defaultValue = "0") page: Int,
-                              @RequestParam(defaultValue = "10") size: Int): Page<ClientDto>
+    fun searchClientsByString(search: String,
+                              page: Int,
+                              size: Int): Page<ClientDto>
 }

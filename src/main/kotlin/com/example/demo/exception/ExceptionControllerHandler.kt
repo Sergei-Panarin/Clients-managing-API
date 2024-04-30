@@ -5,6 +5,7 @@ import org.springframework.beans.TypeMismatchException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.security.access.AccessDeniedException
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.MethodArgumentNotValidException
 import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
@@ -32,6 +33,20 @@ class ExceptionControllerHandler {
     @ExceptionHandler(TypeMismatchException::class)
     fun handleTypeMismatchException(ex: TypeMismatchException, request: WebRequest): ResponseEntity<ErrorResponse> {
         log.error("TypeMismatchException occurred: ", ex)
+        val error = ServiceError.BAD_REQUEST
+        val errorResponse = ErrorResponse(
+            timestamp = ZonedDateTime.now(),
+            code = error.status.value(),
+            status = error.status.name,
+            error = ex.javaClass.simpleName,
+            message = ex.message ?: error.message
+        )
+        return ResponseEntity(errorResponse, error.status)
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException::class)
+    fun handleMethodArgumentNotValidException(ex: MethodArgumentNotValidException, request: WebRequest): ResponseEntity<ErrorResponse> {
+        log.error("MethodArgumentNotValidException occurred: ", ex)
         val error = ServiceError.BAD_REQUEST
         val errorResponse = ErrorResponse(
             timestamp = ZonedDateTime.now(),
