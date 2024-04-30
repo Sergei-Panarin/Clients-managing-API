@@ -11,4 +11,5 @@ interface GenderizeClient {
 
     @GetMapping("/")
     fun getGender(@RequestParam("name") firstName: String): GenderizeResponse
+
 }
