@@ -3,7 +3,6 @@ package com.example.demo.it
 import com.example.demo.dto.ClientDto
 import com.example.demo.getClientDto
 import com.example.demo.mapper.ClientMapper
-import com.example.demo.repository.ClientRepository
 import com.example.demo.service.ClientService
 import com.example.demo.wireMockResponse
 import com.fasterxml.jackson.core.type.TypeReference
@@ -13,7 +12,7 @@ import com.github.tomakehurst.wiremock.client.WireMock
 import com.github.tomakehurst.wiremock.client.WireMock.aResponse
 import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import org.assertj.core.api.Assertions.assertThat
-import org.junit.jupiter.api.AfterEach
+import org.flywaydb.core.Flyway
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
@@ -28,6 +27,7 @@ import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.*
+import org.springframework.transaction.annotation.Transactional
 import org.testcontainers.containers.PostgreSQLContainer
 import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
@@ -37,6 +37,7 @@ import org.testcontainers.junit.jupiter.Testcontainers
 @ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Testcontainers
+@Transactional
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
 class ClientControllerTest {
 
@@ -56,6 +57,9 @@ class ClientControllerTest {
             registry.add("spring.datasource.username", postgreSQLContainer::getUsername)
             registry.add("spring.datasource.password", postgreSQLContainer::getPassword)
             registry.add("spring.flyway.schemas") { "public" }
+            registry.add("spring.flyway.url", postgreSQLContainer::getJdbcUrl)
+            registry.add("spring.flyway.user", postgreSQLContainer::getUsername)
+            registry.add("spring.flyway.password", postgreSQLContainer::getPassword)
         }
     }
 
@@ -66,24 +70,21 @@ class ClientControllerTest {
     private lateinit var objectMapper: ObjectMapper
 
     @Autowired
-    private lateinit var clientRepository: ClientRepository
-
-    @Autowired
     private lateinit var clientMapper: ClientMapper
+
     @Autowired
     private lateinit var clientService: ClientService
 
+    @Autowired
+    private lateinit var flyway: Flyway
+
     @BeforeEach
     fun setup() {
+        flyway.migrate()
         WireMock.stubFor(WireMock.get(WireMock.urlMatching("/\\?name=.*"))
             .willReturn(aResponse()
                 .withHeader("Content-Type", "application/json")
                 .withBody(wireMockResponse)))
-    }
-
-    @AfterEach
-    fun tearDown() {
-        clientRepository.deleteAll()
     }
 
     @Test
@@ -170,6 +171,47 @@ class ClientControllerTest {
             .content(clientJson))
 
         result.andExpect(status().isInternalServerError)
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = ["ADMIN"])
+    fun `add client with ROLE_ADMIN should return error when email is duplicate`() {
+
+        val clientDto1 = getClientDto().apply { email = "duplicate@test.com" }
+        val client1 = clientMapper.toEntity(clientDto1)
+        clientService.addClient(client1)
+
+        val clientDto2 = getClientDto().apply { id = 10L; email = "duplicate@test.com" }
+        val clientJson = objectMapper.writeValueAsString(clientDto2)
+
+        mockMvc.perform(post("/clients")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(clientJson))
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = ["ADMIN"])
+    fun `add client with ROLE_ADMIN should return bad request when first name is blank`() {
+        val clientDto = getClientDto().apply { firstName = "" }
+        val clientJson = objectMapper.writeValueAsString(clientDto)
+
+        mockMvc.perform(post("/clients")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(clientJson))
+            .andExpect(status().isBadRequest)
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = ["ADMIN"])
+    fun `add client with ROLE_ADMIN should return bad request when last name is blank`() {
+        val clientDto = getClientDto().apply { lastName = "" }
+        val clientJson = objectMapper.writeValueAsString(clientDto)
+
+        mockMvc.perform(post("/clients")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(clientJson))
+            .andExpect(status().isBadRequest)
     }
 
     @Test
