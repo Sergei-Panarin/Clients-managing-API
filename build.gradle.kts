@@ -40,6 +40,7 @@ dependencies {
 	testImplementation("org.mockito.kotlin:mockito-kotlin:3.2.0")
 	testImplementation("org.testcontainers:junit-jupiter:1.18.0")
 	testImplementation("org.testcontainers:postgresql:1.18.0")
+	testImplementation("com.github.tomakehurst:wiremock-standalone:3.0.1")
 }
 
 tasks.withType<KotlinCompile> {

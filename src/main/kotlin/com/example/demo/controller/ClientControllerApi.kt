@@ -9,8 +9,6 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.Page
 import org.springframework.util.MultiValueMap
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestParam
 
 @Tag(name = "Client Controller")
 interface ClientControllerApi {
@@ -150,9 +148,9 @@ interface ClientControllerApi {
         description = "Internal Server Error",
         content = [Content(schema = Schema(implementation = ErrorResponse::class))]
     )
-    fun searchClientsByMap(@RequestParam parameters: MultiValueMap<String, String>,
-                           @RequestParam(defaultValue = "0") page: Int,
-                           @RequestParam(defaultValue = "10") size: Int): Page<ClientDto>
+    fun searchClientsByMap(parameters: MultiValueMap<String, String>,
+                           page: Int,
+                           size: Int): Page<ClientDto>
 
     @Operation(summary = "Search clients by string")
     @ApiResponse(

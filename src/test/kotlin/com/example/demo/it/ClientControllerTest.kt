@@ -2,26 +2,27 @@ package com.example.demo.it
 
 import com.example.demo.dto.ClientDto
 import com.example.demo.getClientDto
-import com.example.demo.getValidGenderizeResponse
 import com.example.demo.mapper.ClientMapper
 import com.example.demo.repository.ClientRepository
 import com.example.demo.service.ClientService
-import com.example.demo.service.impl.GenderizeServiceImpl
+import com.example.demo.wireMockResponse
 import com.fasterxml.jackson.core.type.TypeReference
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.kotlin.jacksonObjectMapper
+import com.github.tomakehurst.wiremock.client.WireMock
+import com.github.tomakehurst.wiremock.client.WireMock.aResponse
+import com.github.tomakehurst.wiremock.junit5.WireMockTest
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import org.mockito.ArgumentMatchers.anyString
-import org.mockito.Mockito.mock
-import org.mockito.Mockito.`when`
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.security.test.context.support.WithMockUser
 import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.ActiveProfiles
 import org.springframework.test.context.DynamicPropertyRegistry
 import org.springframework.test.context.DynamicPropertySource
 import org.springframework.test.web.servlet.MockMvc
@@ -32,6 +33,8 @@ import org.testcontainers.junit.jupiter.Container
 import org.testcontainers.junit.jupiter.Testcontainers
 
 @SpringBootTest
+@WireMockTest(httpPort = 8081)
+@ActiveProfiles("test")
 @AutoConfigureMockMvc
 @Testcontainers
 @DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_EACH_TEST_METHOD)
@@ -66,12 +69,17 @@ class ClientControllerTest {
     private lateinit var clientRepository: ClientRepository
 
     @Autowired
-    private lateinit var genderService: GenderizeServiceImpl
-
-    @Autowired
     private lateinit var clientMapper: ClientMapper
     @Autowired
     private lateinit var clientService: ClientService
+
+    @BeforeEach
+    fun setup() {
+        WireMock.stubFor(WireMock.get(WireMock.urlMatching("/\\?name=.*"))
+            .willReturn(aResponse()
+                .withHeader("Content-Type", "application/json")
+                .withBody(wireMockResponse)))
+    }
 
     @AfterEach
     fun tearDown() {
@@ -109,9 +117,7 @@ class ClientControllerTest {
     @Test
     @WithMockUser(username = "test", roles = ["ADMIN"])
     fun `add client with ROLE_ADMIN should return added client`() {
-        genderService = mock(GenderizeServiceImpl::class.java)
-        `when`(genderService.getGender(anyString())).thenReturn(getValidGenderizeResponse())
-        val clientDto = getClientDto()
+        val clientDto = getClientDto().apply { firstName = "test" }
         val clientJson = objectMapper.writeValueAsString(clientDto)
 
         mockMvc.perform(post("/clients")
@@ -167,6 +173,25 @@ class ClientControllerTest {
         mockMvc.perform(get("/clients/999")
             .contentType(MediaType.APPLICATION_JSON))
             .andExpect(status().isNotFound)
+    }
+
+    @Test
+    @WithMockUser(username = "test", roles = ["ADMIN"])
+    fun `update client with ROLE_ADMIN should return updated client`() {
+
+        val clientDto = getClientDto()
+        val client = clientMapper.toEntity(clientDto)
+        val savedClient = clientService.addClient(client)
+
+        val updatedClientDto = clientDto.copy(firstName = "updatedName", lastName = "updatedLastName")
+        val clientJson = objectMapper.writeValueAsString(updatedClientDto)
+
+        mockMvc.perform(put("/clients/${savedClient.id}")
+            .contentType(MediaType.APPLICATION_JSON)
+            .content(clientJson))
+            .andExpect(status().isOk)
+            .andExpect(jsonPath("$.firstName").value(updatedClientDto.firstName))
+            .andExpect(jsonPath("$.lastName").value(updatedClientDto.lastName))
     }
 
     @Test

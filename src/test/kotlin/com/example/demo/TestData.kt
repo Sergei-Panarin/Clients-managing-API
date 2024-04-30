@@ -4,6 +4,8 @@ import com.example.demo.dto.ClientDto
 import com.example.demo.dto.GenderizeResponse
 import com.example.demo.model.Client
 
+val wireMockResponse = "{\"name\":\"John\",\"gender\":\"male\",\"probability\":0.99,\"count\":123}"
+
 fun getClientDto() : ClientDto = ClientDto(
         id = 1L,
         firstName = "John",
